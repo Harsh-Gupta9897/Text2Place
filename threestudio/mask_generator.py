@@ -17,11 +17,11 @@ threestudio.utils.base.get_device = lambda: torch.device('cuda')
 
 
 #### ----------------- Initial Config ----------------- ####
-dump_path = '/data/home/harshg/rishubh_person_scene/dump'
-input_path = '/data/home/harshg/rishubh_person_scene/data'
-output_path = '/data/home/harshg/rishubh_person_scene/time_lapse_bg_fix'   ## output_dir
-output_folder_name = 'output_with_All_parameters_learnable22'               ## output_dir_name
-input_folder_name = 'final_new_images'                                     ### input_bg_image_folder_path
+dump_path = '/path/to/dump_dir'
+input_path = '/path/to/folder/images_folder_name_present'   ## input_dir
+output_path = 'path/to/output_dir'   ## output_dir
+output_folder_name = 'output_dir_name'               ## output_dir_name
+input_folder_name = 'images_folder_name'                                     ### input_bg_image_folder_path
 save_video_frames = False                                                  ### to save video frames in case to visualisize it.
 n_iters = 1000                                                             ### # of iterations to generate mask
 thresold = 0.2                                                            
@@ -770,7 +770,7 @@ def run_main():
 
 if __name__ == "__main__":
     # Replace sys.stdout with the custom Logger
-    log_filename = f'/data/home/harshg/rishubh_person_scene/threestudio/logs/{output_folder_name}_{thresold}.log'
+    log_filename = f'{output_path}/{output_folder_name}_{thresold}/log.txt'
     sys.stdout = Logger(log_filename)
     run_main()
     sys.stdout.logfile.close()

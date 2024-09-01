@@ -142,7 +142,7 @@ def process_inpainting_batch(pipe, image, dilated_masks, prompt,mask_file,seed):
     return batch_results
 
 
-def get_prompt(text,pipe,person="ed_sheeren",embs_path="/data/home/harshg/rishubh_person_scene/data/new_embeddings_oneimage/"):
+def get_prompt(text,pipe,person="ed_sheeren",embs_path="path/to/embs_directory"):
     '''
         Desc: Get the prompt for the inpainting task from general prompt to prompt with special token for subject
     '''
@@ -157,39 +157,38 @@ def get_prompt(text,pipe,person="ed_sheeren",embs_path="/data/home/harshg/rishub
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--gpu', type=int, default=1)
+    parser.add_argument('--base_dir', type=str, default='output_with_All_parameters_learnable2_0.2')
+    parser.add_argument('--image_dir', type=str, default='final_images/')
+    parser.add_argument('--mask_type', type=str, default='blob')
+    parser.add_argument('--n_seeds', type=int, default=5)
+    parser.add_argument("--person", type=str, default="yann_lecun")
+    parser.add_argument('--base_path', type=str, required=True, help='Base path for the project')
+    parser.add_argument('--image_directory', type=str, required=True, help='Directory for images')
+    parser.add_argument('--mask_directory', type=str, required=True, help='Directory for masks')
+    parser.add_argument('--embs_path', type=str, required=True, help='Path for embeddings')
 
-    import argparse
-
-    argparse = argparse.ArgumentParser()
-    argparse.add_argument('--gpu', type=int, default=1)
-    argparse.add_argument('--base_dir', type=str, default='output_with_All_parameters_learnable2_0.2')
-    argparse.add_argument('--image_dir', type=str, default='final_images/')
-    argparse.add_argument('--mask_type', type=str, default='blob')
-    argparse.add_argument('--n_seeds', type=int, default=5)
-    argparse.add_argument("--person", type=str, default="yann_lecun")
-
-    args = argparse.parse_args()
+    args = parser.parse_args()
     
-    base_path = f'/data/home/harshg/rishubh_person_scene/time_lapse_bg_fix/{args.base_dir}'
-    image_directory = f'/data/home/harshg/rishubh_person_scene/data/{args.image_dir}/'
-    mask_directory = f'{base_path}/{args.mask_type}_mask'
-    embs_path="/data/home/harshg/rishubh_person_scene/data/new_embeddings_oneimage/"
+    base_path = args.base_path
+    image_directory = args.image_directory
+    mask_directory = args.mask_directory
+    embs_path = args.embs_path
     # Define radii for dilation 
-    radii = [1,5,15,30,50]
+    radii = [1, 5, 15, 30, 50]
 
     # List all images and masks
     mask_files = [f for f in os.listdir(mask_directory) if f.endswith('.png')]
 
     pipe = AutoPipelineForInpainting.from_pretrained(
-    "diffusers/stable-diffusion-xl-1.0-inpainting-0.1",
-    torch_dtype=torch.float16,
-    variant="fp16"
+        "diffusers/stable-diffusion-xl-1.0-inpainting-0.1",
+        torch_dtype=torch.float16,
+        variant="fp16"
     )
     pipe.enable_model_cpu_offload()
 
-
-    # persons = ['yann_lecun','yoshua_bengio','elon_musk','albert_einstein','sam_altman','steve_jobs','tim_cook','Warren_buffett','APJ_Abdul_Kalam','ed_sheeren','Bill_Gates','Mark_zuckerburg','Nelson_Mandela','Rafael_Nadal','Roger_Fedrer','Oprah_winfrey','fei_fei_li']
-    persons = ['sam_altman','tim_cook']
+    persons = [ f.split('.') for f in os.listdir(embs_path)]  # should be defined based on embedding_dir_name
 
     for person in persons:
         try:
@@ -201,8 +200,8 @@ if __name__ == '__main__':
                 try: 
                     mask_image_path = os.path.join(mask_directory, mask_file)
                     base_arr = mask_image_path.split("/")[-1].split("_")
-                    image_path = os.path.join(image_directory,base_arr[1]+".png")
-                    prompt = get_prompt(base_arr[0],pipe=pipe,person=person,embs_path=embs_path)
+                    image_path = os.path.join(image_directory, base_arr[1] + ".png")
+                    prompt = get_prompt(base_arr[0], pipe=pipe, person=person, embs_path=embs_path)
                     init_image = load_image(image_path).resize((512, 512))
                     original_mask = load_image(mask_image_path).resize((512, 512))
                     dilated_masks = dilate_mask(original_mask, radii)
@@ -212,66 +211,17 @@ if __name__ == '__main__':
                     os.makedirs(output_directory, exist_ok=True)
 
                     for i in range(args.n_seeds):
-                        if i==0:
-                            inpainted_images = [process_inpainting_batch(pipe, init_image, dilated_masks, prompt,mask_file,seed=i)]
+                        if i == 0:
+                            inpainted_images = [process_inpainting_batch(pipe, init_image, dilated_masks, prompt, mask_file, seed=i)]
                         else:
-                            inpainted_images.append(process_inpainting_batch(pipe, init_image, dilated_masks, prompt,mask_file,seed=i))
+                            inpainted_images.append(process_inpainting_batch(pipe, init_image, dilated_masks, prompt, mask_file, seed=i))
                         
                     result_image_path = os.path.join(output_directory, f'{base_arr[0]}_{base_arr[1]}_{args.mask_type}.png')
-                    create_row_grid(init_image_with_text, dilated_masks, inpainted_images, result_image_path, args.n_seeds,person, base_path,f'{base_arr[0]}_{base_arr[1]}.png')
+                    create_row_grid(init_image_with_text, dilated_masks, inpainted_images, result_image_path, args.n_seeds)
                     print(f'Inpainted grid image saved to {result_image_path}')
                 except Exception as e:
                     print('Error processing mask:', mask_file, e)
         except Exception as e:
-            print('Error processing person:', person, e)    
+            print('Error processing person:', person, e)
 
-# CUDA_VISIBLE_DEVICES=2 python inpainting_pipeline/inpainting.py  --base_dir scale_1_blob_3_radius_0.111_0.2
-# CUDA_VISIBLE_DEVICES=1 python inpainting_pipeline/inpainting.py  --base_dir scale_0.7_blob_5_radius_0.1_0.2
 # CUDA_VISIBLE_DEVICES=4 python inpainting_pipeline/inpainting.py  --base_dir g200_campuses_scenes_0.2 --image_dir example_images --mask_type blob --n_seeds 4 --person yann_lecun
-
-
-        
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# # Function to create a two-row grid with the initial image and text in the first cell
-# def create_row_grid(init_image_with_text, dilated_masks, inpainted_images, output_filename,n_seeds):
-#     rows = n_seeds+1
-#     cols = max(len(dilated_masks), len(inpainted_images[0])) + 1  # +1 for the initial image with text
-#     grid_image = Image.new('RGB', ((cols - 1) * 512 + init_image_with_text.width, rows * 512))
-
-#     # Place the initial image with text in the first column
-#     grid_image.paste(init_image_with_text, (0, 0))
-
-#     # Place the dilated masks in the first row and inpainted images in the second row
-#     for i, (mask, inpainted) in enumerate(zip(dilated_masks, inpainted_images[0])):
-#         grid_image.paste(mask, ((i + 1) * 512, 0))  # Offset by one to account for the initial image
-#         for j in range(n_seeds):
-#             inpainted = inpainted_images[j][i]
-#             grid_image.paste(inpainted, ((i + 1) * 512, (j+1)*512))
-
-#     grid_image.save(output_filename)
-
-
-# # Function to add text to the initial image
-# def add_text_to_init_image(init_image, text):
-#     image_with_text = Image.new('RGB', (init_image.width, init_image.height + 50))  # 50 pixels for text
-#     image_with_text.paste(init_image, (0, 50))
-#     draw = ImageDraw.Draw(image_with_text)
-#     font = ImageFont.load_default()
-#     draw.text((20,20), text, (255, 255, 255), font=font)
-#     return image_with_text

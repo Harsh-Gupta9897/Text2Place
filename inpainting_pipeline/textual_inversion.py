@@ -11,42 +11,55 @@ import random
 os.environ['PYTORCH_CUDA_ALLOC_CONF'] = "max_split_size_mb:50"
 os.environ['FORCE_MEM_EFFICIENT_ATTN'] = "0"
 
-# A single token to be used during the learning process; should NOT be used in "prompts" below
-learn_token="sks"
-# start learning with an embedding of single token or "randn_like" 
-start_token="randn_like"
-# list of learning rates [(#steps,learning_rate)] ; 4 gradient accumulation steps per step
-learning_rates=[(4,1e-3),(8,9e-4),(13,8e-4),(20,7e-4),(35,6e-4),(60,5e-4),(100,4e-4),(160,3e-4)]
+# Configuration parameters
+learn_token = "sks"
+start_token = "randn_like"
+learning_rates = [(4, 1e-3), (8, 9e-4), (13, 8e-4), (20, 7e-4), (35, 6e-4), (60, 5e-4), (100, 4e-4), (160, 3e-4)]
 
-# Templates for training: {} defines the token to be learned (learn_token)
-template_prompts_for_objects=["a SLR photo of a {}","a photo of a {}","a rendering of a {}","a cropped photo of a {}","the rendering of a {}","a photo of a small {}","a photo of a fat {}","a rendering of a dirty {}","a dark photo of the {}","a rendering of a big {}","a 3D rendering of a {}","a close-up photo of a {}","a bright photo of the {}","a cropped photo of a {}","a rendering of the {}","an award winning photo of a {}","a photo of one {}","a close-up photo of the {}","a photo of the clean {}","a rendering of a nice {}","a good photo of a {}","a full body photo of a cute {}","a 3D rendering of the small {}","a photo of the weird {}","a photo of the large {}","a rendering of a cool {}","a SLR photo of a small {}"]
-template_prompts_for_faces=["a color photo of {}","a national geograhic photo of {}","a national geograhic shot of {}","a shot of {}","a studio shot of {}", "a selfie of {}","a SLR photo of {}","a photo of {}","a studio photo of {}","a cropped photo of {}","a close-up photo of {}","an award winning photo of {}","a good photo of {}","a portrait photo of {}","a portrait shot of {}","a SLR photo of a cool {}","a SLR photo of the face of {}","a funny portrait of {}","{}, portrait shot","{}, studio lighting","{}, bokeh","{}, professional photo"]
-template_prompts_for_styles=["a face in {} style","a portrait, {}","A {} portrait","{} showing a face","a portrait of a person depicted in a {}","{} showing a person","in style of {}","person ,{} style"]
+template_prompts_for_objects = [
+    "a SLR photo of a {}", "a photo of a {}", "a rendering of a {}", "a cropped photo of a {}", 
+    "the rendering of a {}", "a photo of a small {}", "a photo of a fat {}", "a rendering of a dirty {}", 
+    "a dark photo of the {}", "a rendering of a big {}", "a 3D rendering of a {}", "a close-up photo of a {}", 
+    "a bright photo of the {}", "a cropped photo of a {}", "a rendering of the {}", "an award winning photo of a {}", 
+    "a photo of one {}", "a close-up photo of the {}", "a photo of the clean {}", "a rendering of a nice {}", 
+    "a good photo of a {}", "a full body photo of a cute {}", "a 3D rendering of the small {}", "a photo of the weird {}", 
+    "a photo of the large {}", "a rendering of a cool {}", "a SLR photo of a small {}"
+]
 
-# Define prompts for training
-prompts=template_prompts_for_faces
-#prompts=template_prompts_for_styles
-negative_prompt="deformed, ugly, disfigured, blurry, pixelated, hideous, indistinct, old, malformed, extra hands, extra arms, joined misshapen, collage, grainy, low, poor, monochrome, huge, extra fingers, mutated hands, cropped off, out of frame, poorly drawn hands, mutated hands, fused fingers, too many fingers, fused finger, closed eyes, cropped face, blur, long body, people, watermark, text, logo, signature, text, logo, writing, heading, no text, logo, wordmark, writing, heading, signature, 2 heads, 2 faces, b&w, nude, naked"
+template_prompts_for_faces = [
+    "a color photo of {}", "a national geograhic photo of {}", "a national geograhic shot of {}", "a shot of {}", 
+    "a studio shot of {}", "a selfie of {}", "a SLR photo of {}", "a photo of {}", "a studio photo of {}", 
+    "a cropped photo of {}", "a close-up photo of {}", "an award winning photo of {}", "a good photo of {}", 
+    "a portrait photo of {}", "a portrait shot of {}", "a SLR photo of a cool {}", "a SLR photo of the face of {}", 
+    "a funny portrait of {}", "{}, portrait shot", "{}, studio lighting", "{}, bokeh", "{}, professional photo"
+]
 
-prompt_variations=["men, white background","beard guy, white background","white t-shirt, white background"]
+template_prompts_for_styles = [
+    "a face in {} style", "a portrait, {}", "A {} portrait", "{} showing a face", 
+    "a portrait of a person depicted in a {}", "{} showing a person", "in style of {}", "person ,{} style"
+]
+
+prompts = template_prompts_for_faces
+# prompts = template_prompts_for_styles
+negative_prompt = "deformed, ugly, disfigured, blurry, pixelated, hideous, indistinct, old, malformed, extra hands, extra arms, joined misshapen, collage, grainy, low, poor, monochrome, huge, extra fingers, mutated hands, cropped off, out of frame, poorly drawn hands, mutated hands, fused fingers, too many fingers, fused finger, closed eyes, cropped face, blur, long body, people, watermark, text, logo, signature, text, logo, writing, heading, no text, logo, wordmark, writing, heading, signature, 2 heads, 2 faces, b&w, nude, naked"
+
+prompt_variations = ["men, white background", "beard guy, white background", "white t-shirt, white background"]
 
 # INPUT images
-#imgs_wh=(1024,1024) # 25 min for 500 steps (3090TI) -> noisy when used with lower INPUT image resolution
-imgs_wh=(768,768) # 15 min for 500 steps (3090TI) -> good results
-#imgs_wh=(512,512) # 10 min for 500 steps (3090TI) -> fastest
-imgs_flip=True # additionally use horizontally mirrored INPUT images
+imgs_wh = (768, 768)  # 15 min for 500 steps (3090TI) -> good results
+# imgs_wh = (1024, 1024)  # 25 min for 500 steps (3090TI) -> noisy when used with lower INPUT image resolution
+# imgs_wh = (512, 512)  # 10 min for 500 steps (3090TI) -> fastest
+imgs_flip = True  # additionally use horizontally mirrored INPUT images
 
 # OUTPUT embedding
-embs_path="/data/home/harshg/rishubh_person_scene/Embeddings/"
-os.makedirs(embs_path,exist_ok=True)
-os.makedirs("/data/home/harshg/rishubh_person_scene/inpainting_results/Samples",exist_ok=True)
-emb_file="lambo.pt"
+embs_path = "path/to/Embeddings/"
+os.makedirs(embs_path, exist_ok=True)
+emb_file = "lambo.pt"
 
 # Visualize intermediate optimization steps
-test_prompt="a {} standing near effil tower"
-intermediate_steps=9
-outGIF="/data/home/harshg/rishubh_person_scene/inpainting_results/Samples/lambo.gif"
-
+test_prompt = "a {} standing near effil tower"
+intermediate_steps = 9
+outGIF = "lambo.gif"
 
 
 base = DiffusionPipeline.from_pretrained(
@@ -363,9 +376,17 @@ def train_multiple_concepts(base, main_folder_path, embs_path, prompts, prompt_v
 # Example usage
     
 if __name__ == "__main__":
-    main_folder_path = "/data/home/harshg/rishubh_person_scene/data/child_dataset/"
-    embs_path = "/data/home/harshg/rishubh_person_scene/data/new_embeddings_child/"
-    outGIF_base = "/data/home/harshg/rishubh_person_scene/data/gifs/"
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--main_folder_path", type=str, default="path/to/concepts/")
+    parser.add_argument("--embs_path", type=str, default="path/to/embeddings/")
+    parser.add_argument("--gifs_path", type=str, default="path/to/output_gifs/")
+    args = parser.parse_args()
+
+    main_folder_path = args.main_folder_path
+    embs_path = args.embs_path
+    outGIF_base = args.outGIF_base
+
     os.makedirs(outGIF_base, exist_ok=True)
     os.makedirs(embs_path, exist_ok=True)
     train_multiple_concepts(base, main_folder_path, embs_path, prompts, prompt_variations, learning_rates, intermediate_steps, test_prompt, outGIF_base)
