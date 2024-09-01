@@ -89,3 +89,9 @@ Go Inside the `inpainting_pipeline` folder.
     ```
 
 After running the file , you will get the result in same output folder
+
+
+## Acknowledgements
+
+This project uses code from the [threestudio](https://github.com/threestudio/threestudio) repository. We have made modifications to their original code to suit our specific requirements.
+
