@@ -1,4 +1,21 @@
-# Text2Place
+# Text2Place [ECCV 2024]
+
+<div>
+<span class="author-block">
+<a href="https://rishubhpar.github.io/" target="_blank">Rishubh Parihar</a></span>,
+<span class="author-block"><a href="https://www.linkedin.com/in/harshguptashnd/" target="_blank">Harsh Gupta</a><sup></span>,<br>
+<span class="author-block">
+  <a href="https://www.linkedin.com/in/sachidanand-v-s-449573201/?originalSubdomain=in" target="_blank">Sachidanand VS</a></span>,
+  <span class="author-block">
+    <a href="https://scholar.google.com/citations?user=cVg7HrEAAAAJ&hl=en" target="_blank">Venkatesh Babu</a>
+  </span> (*)
+  </div> 
+
+<div class="is-size-5 publication-authors">
+                  <span class="author-block">
+                  VAL IISc &nbsp;&nbsp;&nbsp;
+</div>
+
 
 ## Setup Environment
 
