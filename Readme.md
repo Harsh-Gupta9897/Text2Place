@@ -1,4 +1,4 @@
-# Text2Place: Affordance Aware Text Guided Human Placement [ECCV 2024]
+# Text2Place: Affordance Aware Text Guided Human Placement <br> [ECCV 2024]
 
 <div>
 <span class="author-block">
@@ -8,12 +8,12 @@
   <a href="https://www.linkedin.com/in/sachidanand-v-s-449573201/?originalSubdomain=in" target="_blank">Sachidanand VS</a></span>,
   <span class="author-block">
     <a href="https://scholar.google.com/citations?user=cVg7HrEAAAAJ&hl=en" target="_blank">Venkatesh Babu</a>
-  </span> (*)
+  </span>
   </div> 
 
 <div class="is-size-5 publication-authors">
                   <span class="author-block">
-                  VAL IISc &nbsp;&nbsp;&nbsp;
+                  Vision and AI Lab, IISc Bangalore &nbsp;&nbsp;&nbsp;
 </div>
 
 
