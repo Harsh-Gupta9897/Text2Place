@@ -1,9 +1,9 @@
-# Text2Place [ECCV 2024]
+# Text2Place: Affordance Aware Text Guided Human Placement [ECCV 2024]
 
 <div>
 <span class="author-block">
 <a href="https://rishubhpar.github.io/" target="_blank">Rishubh Parihar</a></span>,
-<span class="author-block"><a href="https://www.linkedin.com/in/harshguptashnd/" target="_blank">Harsh Gupta</a><sup></span>,<br>
+<span class="author-block"><a href="https://www.linkedin.com/in/harshguptashnd/" target="_blank">Harsh Gupta</a><sup></span>,
 <span class="author-block">
   <a href="https://www.linkedin.com/in/sachidanand-v-s-449573201/?originalSubdomain=in" target="_blank">Sachidanand VS</a></span>,
   <span class="author-block">
